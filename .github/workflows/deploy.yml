@@ -1,0 +1,37 @@
+# Deploy a built image SHA to the VM. Manual, behind the "production" environment (add yourself as a
+# required reviewer in repo settings), so a human approves every release.
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Image tag (git SHA) to deploy; defaults to the latest main commit"
+        required: false
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve SHA
+        run: echo "SHA=${{ inputs.sha || github.event.workflow_run.head_sha || github.sha }}" >> "$GITHUB_ENV"
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.2
+        env: { SHA: "${{ env.SHA }}" }
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          envs: SHA
+          script: |
+            set -euo pipefail
+            cd ~/dispute-assistant
+            git fetch --quiet origin && git checkout --quiet "$SHA"
+            ./deploy/scripts/release.sh "$SHA"

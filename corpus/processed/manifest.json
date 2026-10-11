@@ -1,0 +1,35 @@
+{
+  "corpus_version": "021904d7b5b7",
+  "as_of": "2026-10-07",
+  "chunks": 152,
+  "sources": {
+    "reg-e-1005-2": {
+      "sha256": "5d3d8d49d224797f8a4c6cd12de0ee0bf3a15a2cf4c58233f479e087e992f435",
+      "chunks": 18
+    },
+    "reg-e-1005-6": {
+      "sha256": "6b0c605affaf6f360e552c298a7f8b817518c3d9982e366a28843beec4a2b036",
+      "chunks": 8
+    },
+    "reg-e-1005-11": {
+      "sha256": "947de8b8c8844f72016d3ab7940e9d622ddf24e8e9795a1998804a0cfaeecbff",
+      "chunks": 8
+    },
+    "reg-e-supp-i": {
+      "sha256": "934697933f711423ac9db340c98325f8225bb4dfafb867c148cda71892599fa3",
+      "chunks": 35
+    },
+    "reg-z-1026-12": {
+      "sha256": "c4b8895e2e492f97884b0ae344be89e437715fc16f521b5ef6f56e5264d38f67",
+      "chunks": 11
+    },
+    "reg-z-1026-13": {
+      "sha256": "9f1b70e91cc67739e1bc86196ee187d5d77448c1bd9a47b7e589fa66711c3d3b",
+      "chunks": 9
+    },
+    "reg-z-supp-i": {
+      "sha256": "3419816daeb7abb6439ed4a54c5e0f03093db08a4192f580d3cb93e630f4dd0a",
+      "chunks": 63
+    }
+  }
+}

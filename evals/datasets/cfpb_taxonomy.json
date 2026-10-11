@@ -1,0 +1,63 @@
+{
+  "source": "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/",
+  "date_received_min": "2025-10-01",
+  "pulled_on": "2026-10-09",
+  "products": {
+    "Credit card": {
+      "Problem with a purchase shown on your statement": {
+        "count": 30459,
+        "sub_issues": {
+          "Credit card company isn't resolving a dispute about a purchase on your statement": 23800,
+          "Card was charged for something you did not purchase with the card": 5945,
+          "Overcharged for something you did purchase with the card": 714
+        }
+      },
+      "Problem with a company's investigation into an existing problem": {
+        "count": 3440,
+        "sub_issues": {
+          "Their investigation did not fix an error on your report": 1814,
+          "Was not notified of investigation status or results": 952,
+          "Problem with personal statement of dispute": 336,
+          "Difficulty submitting a dispute or getting information about a dispute over the phone": 232,
+          "Investigation took more than 30 days": 106
+        }
+      }
+    },
+    "Checking or savings account": {
+      "Managing an account": {
+        "count": 51124,
+        "sub_issues": {
+          "Deposits and withdrawals": 17011,
+          "Problem using a debit or ATM card": 13956,
+          "Funds not handled or disbursed as instructed": 5932,
+          "Banking errors": 4195,
+          "Problem accessing account": 4006,
+          "Problem making or receiving payments": 3694,
+          "Cashing a check": 1079,
+          "Fee problem": 842,
+          "Deposits or withdrawals": 280,
+          "Problem with renewal": 80,
+          "Problem with fees or penalties": 49
+        }
+      },
+      "Problem with a lender or other company charging your account": {
+        "count": 12591,
+        "sub_issues": {
+          "Transaction was not authorized": 10236,
+          "Money was taken from your account on the wrong day or for the wrong amount": 1677,
+          "Can't stop withdrawals from your account": 678
+        }
+      }
+    },
+    "Money transfer, virtual currency, or money service": {
+      "Fraud or scam": {
+        "count": 11294,
+        "sub_issues": {}
+      },
+      "Unauthorized transactions or other transaction problem": {
+        "count": 6788,
+        "sub_issues": {}
+      }
+    }
+  }
+}

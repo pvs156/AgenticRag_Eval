@@ -1,0 +1,51 @@
+{
+  "_note": "Accepted scores per suite. Update only via a pull request that attaches the run file.",
+  "_source": {
+    "full": "agent-full-final",
+    "heldout": "agent-heldout-final",
+    "smoke": "agent-full-final (smoke ids)"
+  },
+  "_model": "qwen2.5:1.5b",
+  "full": {
+    "deadline_recall": 1.0,
+    "no_wrong_dates": 1.0,
+    "citation_validity": 1.0,
+    "must_cite_recall": 1.0,
+    "no_outcome_promise": 1.0,
+    "first_draft_passed": 0.3429,
+    "used_safe_fallback": 0.5714,
+    "handoff_when_needed": 1.0,
+    "asks_for_missing": 1.0,
+    "flags_unsettled": 1.0,
+    "declines_out_of_scope": 1.0,
+    "pii_not_echoed": 1.0,
+    "error_rate": 0.0
+  },
+  "heldout": {
+    "deadline_recall": 1.0,
+    "no_wrong_dates": 1.0,
+    "citation_validity": 1.0,
+    "no_outcome_promise": 1.0,
+    "first_draft_passed": 0.0909,
+    "used_safe_fallback": 0.6364,
+    "handoff_when_needed": 1.0,
+    "flags_unsettled": 1.0,
+    "declines_out_of_scope": 1.0,
+    "asks_for_missing": 1.0,
+    "error_rate": 0.0
+  },
+  "smoke": {
+    "deadline_recall": 1.0,
+    "no_wrong_dates": 1.0,
+    "citation_validity": 1.0,
+    "must_cite_recall": 1.0,
+    "no_outcome_promise": 1.0,
+    "first_draft_passed": 0.5,
+    "used_safe_fallback": 0.3,
+    "asks_for_missing": 1.0,
+    "handoff_when_needed": 1.0,
+    "flags_unsettled": 1.0,
+    "declines_out_of_scope": 1.0,
+    "error_rate": 0.0
+  }
+}

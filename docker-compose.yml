@@ -1,0 +1,101 @@
+# Full stack on one small VM. Only Caddy is exposed to the internet (80/443).
+#   docker compose up -d            (uses images from GHCR; see deploy/README.md)
+#   docker compose up -d --build    (build locally)
+name: dispute-assistant
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web, api, grafana]
+    logging: *logging
+
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/OWNER/dispute-assistant-web:latest}
+    build: { context: ./web, args: { GIT_SHA: "${GIT_SHA:-dev}" } }
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8000
+      DEMO_TOKEN: ${DEMO_TOKEN:-}
+      INTERVIEWER_TOKEN: ${INTERVIEWER_TOKEN:-}
+    depends_on: [api]
+    mem_limit: 384m
+    logging: *logging
+
+  api:
+    image: ${API_IMAGE:-ghcr.io/OWNER/dispute-assistant-api:latest}
+    build: { context: ., args: { GIT_SHA: "${GIT_SHA:-dev}" } }
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      DATABASE_URL: sqlite:////data/app.db
+    volumes: [api_data:/data]
+    depends_on: [qdrant]
+    mem_limit: 1536m
+    logging: *logging
+
+  qdrant:
+    image: qdrant/qdrant:v1.15.4
+    restart: unless-stopped
+    volumes: [qdrant_data:/qdrant/storage]
+    mem_limit: 512m
+    logging: *logging
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./deploy/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    mem_limit: 384m
+    logging: *logging
+
+  grafana:
+    image: grafana/grafana-oss:12.1.1
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env}
+      GF_SERVER_ROOT_URL: https://${SITE_ADDRESS:-localhost}/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on: [prometheus]
+    mem_limit: 384m
+    logging: *logging
+
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    restart: unless-stopped
+    command: ["--path.rootfs=/host"]
+    volumes: ["/:/host:ro,rslave"]
+    pid: host
+    mem_limit: 64m
+    logging: *logging
+
+volumes:
+  caddy_data:
+  caddy_config:
+  api_data:
+  qdrant_data:
+  prometheus_data:
+  grafana_data:

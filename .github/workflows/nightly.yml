@@ -1,0 +1,52 @@
+# Nightly: full golden-set eval with DeepEval judge metrics, plus the red-team suite.
+name: nightly
+
+on:
+  schedule: [{ cron: "30 6 * * *" }]
+  workflow_dispatch:
+
+jobs:
+  full-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+      LLM_REASONING_EFFORT: ""
+      JUDGE_BASE_URL: ${{ vars.JUDGE_BASE_URL }}
+      JUDGE_API_KEY: ${{ secrets.JUDGE_API_KEY }}
+      JUDGE_MODEL: ${{ vars.JUDGE_MODEL }}
+      JUDGE_BUDGET_USD: "0.50"
+      LLM_CACHE: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -e ".[dev]"
+      - uses: actions/cache@v4
+        with: { path: .cache, key: "nightly-${{ github.run_id }}", restore-keys: "nightly-" }
+      - run: python -m evals.run_eval --system agent --suite full --judge --out evals/runs/nightly.json
+      - run: python -m evals.gate evals/runs/nightly.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "nightly-${{ github.run_id }}", path: evals/runs/nightly.json }
+
+  red-team:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: pip install -e .
+      - run: npx --yes promptfoo@latest eval -c evals/promptfoo/redteam.yaml --no-progress-bar -o evals/runs/redteam.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "redteam-${{ github.run_id }}", path: evals/runs/redteam.json }

@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+.env
+.env.*
+!.env.example
+corpus/raw/
+evals/runs/
+.cache/
+qdrant_storage/
+node_modules/
+web/.next/
+*.log

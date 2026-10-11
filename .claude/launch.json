@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "C:\\Users\\Asus\\Inrhythm\\Mastercard_PGS_Labs\\dispute-assistant\\.venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "uvicorn", "app.api.main:app", "--port", "8000"],
+      "port": 8000,
+      "url": "http://localhost:8000"
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "web", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}

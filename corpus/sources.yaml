@@ -1,0 +1,49 @@
+# Provenance registry. Only `status: primary` sources are indexed for retrieval.
+# eCFR content is US government work (public domain).
+# `as_of` pins the eCFR point-in-time date so the corpus is reproducible.
+as_of: "2026-10-07"
+sources:
+  - id: reg-e-1005-2
+    title: "Regulation E 12 CFR 1005.2 Definitions"
+    regime: E
+    status: primary
+    kind: regulation
+    ecfr: { part: "1005", section: "1005.2" }
+  - id: reg-e-1005-6
+    title: "Regulation E 12 CFR 1005.6 Liability of consumer for unauthorized transfers"
+    regime: E
+    status: primary
+    kind: regulation
+    ecfr: { part: "1005", section: "1005.6" }
+  - id: reg-e-1005-11
+    title: "Regulation E 12 CFR 1005.11 Procedures for resolving errors"
+    regime: E
+    status: primary
+    kind: regulation
+    ecfr: { part: "1005", section: "1005.11" }
+  - id: reg-e-supp-i
+    title: "Regulation E Supplement I (Official Interpretations), sections 2, 6, 11"
+    regime: E
+    status: primary
+    kind: interpretation
+    ecfr: { part: "1005", appendix: "Supplement I to Part 1005" }
+    keep_sections: ["1005.2", "1005.6", "1005.11"]
+  - id: reg-z-1026-12
+    title: "Regulation Z 12 CFR 1026.12 Special credit card provisions"
+    regime: Z
+    status: primary
+    kind: regulation
+    ecfr: { part: "1026", section: "1026.12" }
+  - id: reg-z-1026-13
+    title: "Regulation Z 12 CFR 1026.13 Billing error resolution"
+    regime: Z
+    status: primary
+    kind: regulation
+    ecfr: { part: "1026", section: "1026.13" }
+  - id: reg-z-supp-i
+    title: "Regulation Z Supplement I (Official Interpretations), sections 12, 13"
+    regime: Z
+    status: primary
+    kind: interpretation
+    ecfr: { part: "1026", appendix: "Supplement I to Part 1026" }
+    keep_sections: ["1026.12", "1026.13"]

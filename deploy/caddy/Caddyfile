@@ -1,0 +1,29 @@
+# Caddy terminates TLS (automatic Let's Encrypt certificates when SITE_ADDRESS is a real domain).
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'"
+		-Server
+	}
+
+	# Grafana (has its own login)
+	handle /grafana* {
+		reverse_proxy grafana:3000
+	}
+
+	# The FastAPI service is never exposed directly; the browser talks to Next.js only.
+	handle {
+		reverse_proxy web:3000
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

@@ -1,0 +1,68 @@
+groups:
+  - name: assistant
+    rules:
+      - alert: ApiDown
+        expr: up{job="api"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "API is not being scraped"
+          runbook: "deploy/RUNBOOK.md#api-down"
+
+      - alert: HighErrorRate
+        expr: sum(rate(assistant_errors_total[10m])) / clamp_min(sum(rate(assistant_requests_total[10m])), 1e-9) > 0.05
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "More than 5% of chat turns are failing"
+          runbook: "deploy/RUNBOOK.md#errors"
+
+      - alert: SlowTurns
+        expr: histogram_quantile(0.95, sum by (le) (rate(assistant_turn_latency_seconds_bucket[15m]))) > 20
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          summary: "p95 chat latency above 20s"
+          runbook: "deploy/RUNBOOK.md#latency"
+
+      - alert: AbstainSpike
+        expr: sum(rate(assistant_abstain_total[30m])) / clamp_min(sum(rate(assistant_requests_total[30m])), 1e-9) > 0.3
+        for: 30m
+        labels: { severity: warning }
+        annotations:
+          summary: "More than 30% of turns abstain (verification failing or out-of-scope traffic)"
+          runbook: "deploy/RUNBOOK.md#quality"
+
+      - alert: RetrySpike
+        expr: sum(rate(assistant_retries_total[30m])) / clamp_min(sum(rate(assistant_requests_total[30m])), 1e-9) > 0.5
+        for: 30m
+        labels: { severity: warning }
+        annotations:
+          summary: "Self-healing retries on more than half of turns (model or prompt regression?)"
+          runbook: "deploy/RUNBOOK.md#quality"
+
+      - alert: GroundednessDrop
+        expr: >
+          sum(rate(assistant_online_score_sum{metric="groundedness"}[6h]))
+          / clamp_min(sum(rate(assistant_online_score_count{metric="groundedness"}[6h])), 1e-9) < 0.7
+          and sum(increase(assistant_online_score_count{metric="groundedness"}[6h])) > 5
+        for: 30m
+        labels: { severity: warning }
+        annotations:
+          summary: "Sampled groundedness below 0.7 over 6h"
+          runbook: "deploy/RUNBOOK.md#quality"
+
+      - alert: LlmSpendHigh
+        expr: sum(increase(llm_cost_usd_total[24h])) > 1
+        labels: { severity: warning }
+        annotations:
+          summary: "LLM spend above $1 in 24h (budget guard)"
+          runbook: "deploy/RUNBOOK.md#cost"
+
+      - alert: HostDiskFilling
+        expr: (node_filesystem_avail_bytes{mountpoint="/host"} / node_filesystem_size_bytes{mountpoint="/host"}) < 0.15
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          summary: "Less than 15% disk free on the VM"
+          runbook: "deploy/RUNBOOK.md#disk"
