@@ -5,6 +5,10 @@ on:
   schedule: [{ cron: "30 6 * * *" }]
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash  # bash -eo pipefail: a failing gate must fail the job even when piped through tee
+
 jobs:
   full-eval:
     runs-on: ubuntu-latest

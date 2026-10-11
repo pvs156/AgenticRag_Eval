@@ -31,3 +31,11 @@ def test_regression_vs_baseline_fails_even_above_floor():
 def test_missing_metric_is_skipped_not_failed():
     ok, rows = evaluate(run(deadline_recall=1.0, error_rate=0.0), TH, None)
     assert ok and rows[2][4].startswith("skipped")
+
+
+def test_latency_rule_skipped_for_local_model_only():
+    th = {"metrics": {"latency_p95_s": {"max": 60, "hosted_only": True}}}
+    local = {"suite": "smoke", "llm_base_url": "http://localhost:11434/v1", "metrics": {"latency_p95_s": 117.0}}
+    hosted = {**local, "llm_base_url": "https://api.groq.com/openai/v1"}
+    assert evaluate(local, th, None)[0] is True
+    assert evaluate(hosted, th, None)[0] is False

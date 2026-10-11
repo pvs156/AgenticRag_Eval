@@ -22,11 +22,27 @@ THRESHOLDS = ROOT / "thresholds.yaml"
 BASELINE = ROOT / "baseline.json"
 
 
+def _is_local(run: dict) -> bool:
+    url = run.get("llm_base_url", "")
+    return "localhost" in url or "127.0.0.1" in url
+
+
 def evaluate(run: dict, thresholds: dict, baseline: dict | None) -> tuple[bool, list[list[str]]]:
     rows, ok = [], True
     base_metrics = (baseline or {}).get(run["suite"], {})
     for name, rule in thresholds["metrics"].items():
         value = run["metrics"].get(name)
+        if rule.get("hosted_only") and _is_local(run):
+            rows.append(
+                [
+                    name,
+                    "n/a" if value is None else f"{value:.3f}",
+                    "",
+                    json.dumps(rule),
+                    "skipped (local CPU model; latency is gated on the hosted model only)",
+                ]
+            )
+            continue
         if value is None:
             rows.append([name, "n/a", "", "", "skipped (no applicable cases)"])
             continue

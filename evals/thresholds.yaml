@@ -21,5 +21,5 @@ metrics:
   # judge metrics (nightly, --judge)
   faithfulness: { min: 0.7, max_drop: 0.1 }
   policy_compliance: { min: 0.7, max_drop: 0.1 }
-  # operations
-  latency_p95_s: { max: 60 }
+  # operations: only meaningful on the production model, so skipped for local CPU models (see gate.py)
+  latency_p95_s: { max: 60, hosted_only: true }
