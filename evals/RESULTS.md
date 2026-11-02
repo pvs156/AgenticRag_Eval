@@ -1,5 +1,67 @@
 # Evaluation results
 
+## Update 2026-11-01: hosted model (Groq `openai/gpt-oss-120b`, free tier)
+
+Same agent, same golden and held-out sets, now with a production-grade model. Judge: Groq `qwen/qwen3.8-27b`
+(a different model family from the generator).
+
+| metric | agent / full<br><sub>agent-full-final</sub> | agent / full<br><sub>agent-full-groq</sub> | agent / heldout<br><sub>agent-heldout-final</sub> | agent / heldout<br><sub>agent-heldout-groq</sub> | agent / smoke<br><sub>agent-smoke-groq-judged</sub> |
+|---|---|---|---|---|---|
+| deadline_recall | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| no_wrong_dates | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| must_cite_recall | 1.00 | 1.00 |  |  | 1.00 |
+| citation_validity | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| handoff_when_needed | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| asks_for_missing | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| flags_unsettled | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| declines_out_of_scope | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| no_outcome_promise | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| pii_not_echoed | 1.00 | 1.00 |  |  |  |
+| first_draft_passed | 0.34 | 0.86 | 0.09 | 0.82 | 0.90 |
+| used_safe_fallback | 0.57 | 0.00 | 0.64 | 0.00 | 0.00 |
+| faithfulness |  |  |  |  | 0.97 |
+| answer_relevancy |  |  |  |  | 0.75 |
+| policy_compliance |  |  |  |  | 1.00 |
+| error_rate | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| latency_p50_s | 4.43 | 4.12 | 5.78 | 4.28 | 3.73 |
+| latency_p95_s | 10.57 | 5.30 | 33.14 | 12.62 | 10.09 |
+| cases | 45 | 45 | 16 | 16 | 15 |
+| model | qwen2.5:1.5b | openai/gpt-oss-120b | qwen2.5:1.5b | openai/gpt-oss-120b | openai/gpt-oss-120b |
+
+What changed versus the local 1.5B model:
+- **First drafts that pass the verifier:** 34% to 86% (golden) and 9% to 82% (held-out). Answers needing the safe
+  templated fallback: from 57-64% to **0%**.
+- **Judge metrics on the smoke suite:**
+  - faithfulness 0.97 (claims supported by the retrieved regulation text);
+  - policy compliance 1.00;
+  - answer relevancy 0.75. DeepEval's relevancy metric marks the templated sections (key dates, disclaimers) as
+    "irrelevant statements", so 0.75 is partly an artifact of the response format.
+- **Behaviour metrics:** 1.00 across the board on both sets.
+
+Two issues found and fixed on the way:
+- **U07, an agent bug.** gpt-oss-120b marked a customer as non-US because the *merchant* was in Spain, so the agent
+  handed off instead of answering. "Non-US" is now grounded in the customer's words only, the same rule as dates
+  and card type.
+- **P02, a scorer bug.** The eval scorer flagged "the excerpts do not guarantee a refund" as a promise. It now
+  uses the verifier's negation-aware check.
+
+**Judge calibration (`python -m evals.judge_calibration`).**
+- **First run:** policy compliance 0.65. Reading the judge's reasons showed:
+  - The rubric was looser than the design spec. It implied every dispute needs a handoff, and it didn't say the
+    key dates are computed by the system.
+  - G-Eval's auto-generated steps inverted "do not penalize the key dates" into "key dates are prohibited".
+  - One real gap: scam clarifying questions didn't offer a person, which the design spec requires. Now fixed.
+- **Fix:** the rubric is now explicit `evaluation_steps` matching `docs/03_DESIGN_SPEC.md`.
+- **Negative control:** the judge must flag five deliberately bad replies (promised refund, investment advice, scam
+  with no handoff, invented rule, echoed card number) and pass a good one. It does: 0.20-0.50 versus 1.00.
+- **Still to do:** a human-labelled set of about 30 real replies, to measure judge-human agreement.
+
+Latency: p50 about 4 s and p95 about 5-13 s on Groq, excluding waits for the free tier's 8K tokens-per-minute cap.
+
+---
+
+## Development history (local `qwen2.5:1.5b`, 2026-10-09)
+
 All numbers come from run files in `evals/runs/` (regenerate with `python -m evals.report <run files>`).
 Model for every run: local `qwen2.5:1.5b` via Ollama on a laptop CPU (the $0 development setup). Date: 2026-10-09.
 

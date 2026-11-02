@@ -224,3 +224,16 @@ def test_verifier_promise_and_unsettled_false_positives():
     assert not check_output(
         "Your card issuer must refund this agent purchase quickly [12 CFR 1026.12].", **unsettled
     ).ok
+
+
+def test_foreign_merchant_is_answered_not_handed_off(retriever):
+    # The LLM claims the customer is outside the US because the merchant is in Spain.
+    claims_non_us = dict(DEBIT_UNAUTH, non_us=True)
+    text = "A shop in Spain charged my debit card on my September 30 statement and I've never been there."
+    reply, _, _ = run(retriever, claims_non_us, [GOOD], text=text)
+    assert reply.regime == "reg_e" and reply.deadlines and reply.handoff_reason != "not_in_sources"
+
+
+def test_scam_clarifying_question_still_offers_a_person(retriever):
+    reply, _, _ = run(retriever, dict(intent="scam"), [], text="I think I was scammed out of $900 from my checking")
+    assert reply.asked_for == ["customer_initiated"] and reply.handoff_offered and reply.handoff_reason == "scam"

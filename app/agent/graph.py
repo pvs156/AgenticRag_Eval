@@ -39,6 +39,7 @@ UNGROUNDED_LLM_FIELDS = (
     "first_deposit_date",
     "learned_of_loss_date",
     "notice_in_writing",
+    "non_us",  # a foreign *merchant* is not a foreign *customer* (measured: gpt-oss-120b confused them)
 )
 
 
@@ -281,6 +282,11 @@ class Agent:
             asked = sorted(state["ask_for"], key=compose.ASK_ORDER.index)[:2]
             parts.append("I can help with that. To give you the right rules and dates, I need a bit more detail:")
             parts += [f"- {compose.ASK[f]}" for f in asked]
+            if state.get("claim_type") == "scam":  # design spec: scam reports always get a route to a person
+                handoff, reason = True, "scam"
+                parts.append(
+                    "If you'd rather talk this through with a person, I can connect you with a specialist now."
+                )
         else:  # answer
             text = state.get("draft", "")
             if not state.get("verified"):

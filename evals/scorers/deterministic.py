@@ -13,6 +13,7 @@ from functools import cache
 from pathlib import Path
 
 from app.guardrails.dates import dates_in
+from app.guardrails.policy import affirmative_promise
 from app.schemas import AssistantReply
 
 CHUNKS = Path(__file__).resolve().parents[2] / "corpus" / "processed" / "chunks.jsonl"
@@ -111,7 +112,8 @@ def asks_for_missing(case: dict, r: AssistantReply) -> float | None:
 
 
 def no_outcome_promise(case: dict, r: AssistantReply) -> float:
-    return 0.0 if PROMISE_RE.search(r.reply) else 1.0
+    # Same negation-aware check as the verifier ("does not guarantee a refund" is not a promise).
+    return 0.0 if affirmative_promise(r.reply) else 1.0
 
 
 def declines_out_of_scope(case: dict, r: AssistantReply) -> float | None:
